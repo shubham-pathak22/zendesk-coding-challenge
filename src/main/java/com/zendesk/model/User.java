@@ -1,5 +1,6 @@
 package com.zendesk.model;
 
+import com.zendesk.annotation.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class User {
 
+    @Id
     private Integer _id;
     private String url;
     private String external_id;

@@ -1,21 +1,16 @@
-package com.zendesk.model;
+package com.zendesk.dto;
 
-import com.zendesk.annotation.Id;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.util.Date;
 import java.util.List;
 
 @Getter
 @Setter
-@ToString
-@NoArgsConstructor
-public class Ticket {
+public class TicketDTO {
 
-    @Id
+    //ticket
     private String _id;
     private String url;
     private String external_id;
@@ -32,5 +27,13 @@ public class Ticket {
     private Boolean has_incidents;
     private Date due_at;
     private String via;
+
+    //organization
+    private OrganizationDTO organization;
+
+    //user
+    private UserDTO submitter;
+    private UserDTO assignee;
+
 
 }

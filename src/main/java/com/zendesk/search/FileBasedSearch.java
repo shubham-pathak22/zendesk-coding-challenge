@@ -2,15 +2,20 @@ package com.zendesk.search;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import com.zendesk.annotation.Id;
+import com.zendesk.exception.NoIdFoundException;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -21,6 +26,7 @@ import java.util.*;
 
 public class FileBasedSearch<T, ID> implements Searchable<T, ID> {
 
+    private static final Logger log = LoggerFactory.getLogger(FileBasedSearch.class);
     private Class<T> clazz;
     private File file;
     private String id;
@@ -28,10 +34,9 @@ public class FileBasedSearch<T, ID> implements Searchable<T, ID> {
     private Map<String,Class> fields = new LinkedHashMap<>();
     private Map<String,Method> getter = new HashMap<>();
 
-    public FileBasedSearch(String filePath, Class<T> clazz, String id) {
+    public FileBasedSearch(String filePath, Class<T> clazz) {
         this.clazz = clazz;
         this.file = new File(filePath);
-        this.id = id;
         initialize();
     }
 
@@ -39,8 +44,17 @@ public class FileBasedSearch<T, ID> implements Searchable<T, ID> {
         try {
             Field[] fields = this.clazz.getDeclaredFields();
             for (Field f : fields) {
+                Annotation[] annotations = f.getAnnotations();
+                for(Annotation a :annotations){
+                    if(a.annotationType().equals(Id.class)){
+                        this.id = f.getName();
+                    }
+                }
                 this.fields.put(f.getName(), f.getType());
                 this.getter.put(f.getName(), new PropertyDescriptor(f.getName(), this.clazz).getReadMethod());
+            }
+            if(this.id == null){
+                throw new NoIdFoundException("No @Id field found in " + this.clazz);
             }
             Gson gson = new GsonBuilder().registerTypeAdapter(Date.class, new DateDeserializer()).create();
             String lines = FileUtils.readFileToString(this.file, "UTF-8");
@@ -57,6 +71,11 @@ public class FileBasedSearch<T, ID> implements Searchable<T, ID> {
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
     }
 
     @Override
@@ -137,5 +156,6 @@ public class FileBasedSearch<T, ID> implements Searchable<T, ID> {
             DateTimeFormatter df = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss ZZ");
             return df.parseDateTime(date).withZone(DateTimeZone.forID("Pacific/Honolulu")).toLocalDateTime().toDate();
         }
+
     }
 }
