@@ -3,15 +3,11 @@ package com.zendesk.search;
 import java.util.List;
 import java.util.Set;
 
-public interface Searchable<T,ID> {
+public interface Searchable<T> {
 
-    String getIdFieldName();
-
-    T searchById(ID id);
+    T searchById(String id);
 
     List<T> searchByTermValue(String term, String value);
 
     Set<String> getSearchableFields();
-
-
 }

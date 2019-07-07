@@ -6,7 +6,7 @@ import com.zendesk.dto.UserDTO;
 import com.zendesk.model.Organization;
 import com.zendesk.model.Ticket;
 import com.zendesk.model.User;
-import com.zendesk.search.FileBasedSearch;
+import com.zendesk.search.Index;
 import com.zendesk.search.Searchable;
 
 import java.util.ArrayList;
@@ -15,36 +15,32 @@ import java.util.stream.Collectors;
 
 public class SearchServiceImpl implements SearchService{
 
-    private Searchable<User,Integer> user;
-    private Searchable<Ticket,String> ticket;
-    private Searchable<Organization,Integer> organization;
+    private Searchable<User> user;
+    private Searchable<Ticket> ticket;
+    private Searchable<Organization> organization;
 
 
     public SearchServiceImpl(){
-        user = new FileBasedSearch<>("/Users/shubham/projects/users.json",User.class);
-        ticket = new FileBasedSearch<>("/Users/shubham/projects/tickets.json",Ticket.class);
-        organization = new FileBasedSearch<>("/Users/shubham/projects/organizations.json",Organization.class);
+        user = new Index<>("/Users/shubham/projects/users.json",User.class);
+        ticket = new Index<>("/Users/shubham/projects/tickets.json",Ticket.class);
+        organization = new Index<>("/Users/shubham/projects/organizations.json",Organization.class);
 
     }
     @Override
     public List<UserDTO> searchByUser(String term, String val) {
         List<User> userList = new ArrayList<>();
         List<UserDTO> userDTOList = new ArrayList<>();
-        if(term.equals(user.getIdFieldName())){
-            userList.add(user.searchById(Integer.parseInt(val)));
-        }else{
-            userList.addAll(user.searchByTermValue(term,val));
-        }
+        userList.addAll(user.searchByTermValue(term,val));
         for(User user : userList){
             UserDTO userDTO = toUserDTO(user);
-            userDTO.setOrganizationDTO(toOrganizationDTO(organization.searchById(userDTO.getOrganization_id())));
+            userDTO.setOrganizationDTO(toOrganizationDTO(organization.searchById(userDTO.getOrganization_id().toString())));
             List<TicketDTO> assignedTickets = ticket.searchByTermValue("assignee_id",userDTO.get_id().toString())
                     .stream().map(t -> toTicketDTO(t)).collect(Collectors.toList());
             userDTO.setAssignedTickets(assignedTickets);
             List<TicketDTO> submittedTickets = ticket.searchByTermValue("submitter_id",userDTO.get_id().toString())
                     .stream().map(t -> toTicketDTO(t)).collect(Collectors.toList());
             userDTO.setSubmittedTickets(submittedTickets);
-            userDTO.setOrganizationDTO(toOrganizationDTO(organization.searchById(userDTO.getOrganization_id())));
+            userDTO.setOrganizationDTO(toOrganizationDTO(organization.searchById(userDTO.getOrganization_id().toString())));
             userDTOList.add(userDTO);
         }
         return userDTOList;
@@ -54,11 +50,7 @@ public class SearchServiceImpl implements SearchService{
     public List<OrganizationDTO> searchByOrganization(String term, String val) {
         List<Organization> organizationList = new ArrayList<>();
         List<OrganizationDTO> organizationDTOList = new ArrayList<>();
-        if(term.equals(organization.getIdFieldName())){
-            organizationList.add(organization.searchById(Integer.parseInt(val)));
-        }else{
-            organizationList.addAll(organization.searchByTermValue(term,val));
-        }
+        organizationList.addAll(organization.searchByTermValue(term,val));
         for(Organization organization : organizationList){
             OrganizationDTO organizationDTO = toOrganizationDTO(organization);
             List<TicketDTO> tickets = ticket.searchByTermValue("organization_id",organizationDTO.get_id().toString())
@@ -76,16 +68,12 @@ public class SearchServiceImpl implements SearchService{
     public List<TicketDTO> searchByTicket(String term, String val) {
         List<Ticket> ticketList = new ArrayList<>();
         List<TicketDTO> ticketDTOList = new ArrayList<>();
-        if(term.equals(ticket.getIdFieldName())){
-            ticketList.add(ticket.searchById(val));
-        }else{
-            ticketList.addAll(ticket.searchByTermValue(term,val));
-        }
+        ticketList.addAll(ticket.searchByTermValue(term,val));
         for(Ticket ticket : ticketList){
             TicketDTO ticketDTO = toTicketDTO(ticket);
-            ticketDTO.setOrganization(toOrganizationDTO(organization.searchById(ticketDTO.getOrganization_id())));
-            ticketDTO.setSubmitter(toUserDTO(user.searchById(ticketDTO.getSubmitter_id())));
-            ticketDTO.setAssignee(toUserDTO(user.searchById(ticketDTO.getAssignee_id())));
+            ticketDTO.setOrganization(toOrganizationDTO(organization.searchById(ticketDTO.getOrganization_id().toString())));
+            ticketDTO.setSubmitter(toUserDTO(user.searchById(ticketDTO.getSubmitter_id().toString())));
+            ticketDTO.setAssignee(toUserDTO(user.searchById(ticketDTO.getAssignee_id().toString())));
             ticketDTOList.add(ticketDTO);
         }
         return ticketDTOList;
