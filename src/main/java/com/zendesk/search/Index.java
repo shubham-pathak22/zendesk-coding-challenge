@@ -6,11 +6,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import com.sun.deploy.util.StringUtils;
 import com.zendesk.annotation.Id;
-import com.zendesk.model.Organization;
-import com.zendesk.model.Ticket;
-import com.zendesk.model.User;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -26,7 +22,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Index<T> implements Searchable<T> {
