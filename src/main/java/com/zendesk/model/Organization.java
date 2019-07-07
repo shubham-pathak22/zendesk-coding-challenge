@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 @ToString
 @NoArgsConstructor
-public class Organisation {
+public class Organization {
 
     private Integer _id;
     private String url;
