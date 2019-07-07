@@ -30,7 +30,7 @@ public class SearchServiceImpl implements SearchService{
     public List<UserDTO> searchByUser(String term, String val) {
         List<User> userList = new ArrayList<>();
         List<UserDTO> userDTOList = new ArrayList<>();
-        if(term.equals(user.getId())){
+        if(term.equals(user.getIdFieldName())){
             userList.add(user.searchById(Integer.parseInt(val)));
         }else{
             userList.addAll(user.searchByTermValue(term,val));
@@ -54,7 +54,7 @@ public class SearchServiceImpl implements SearchService{
     public List<OrganizationDTO> searchByOrganization(String term, String val) {
         List<Organization> organizationList = new ArrayList<>();
         List<OrganizationDTO> organizationDTOList = new ArrayList<>();
-        if(term.equals(organization.getId())){
+        if(term.equals(organization.getIdFieldName())){
             organizationList.add(organization.searchById(Integer.parseInt(val)));
         }else{
             organizationList.addAll(organization.searchByTermValue(term,val));
@@ -76,7 +76,7 @@ public class SearchServiceImpl implements SearchService{
     public List<TicketDTO> searchByTicket(String term, String val) {
         List<Ticket> ticketList = new ArrayList<>();
         List<TicketDTO> ticketDTOList = new ArrayList<>();
-        if(term.equals(ticket.getId())){
+        if(term.equals(ticket.getIdFieldName())){
             ticketList.add(ticket.searchById(val));
         }else{
             ticketList.addAll(ticket.searchByTermValue(term,val));

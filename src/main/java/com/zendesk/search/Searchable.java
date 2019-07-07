@@ -5,7 +5,7 @@ import java.util.Set;
 
 public interface Searchable<T,ID> {
 
-    String getId();
+    String getIdFieldName();
 
     T searchById(ID id);
 

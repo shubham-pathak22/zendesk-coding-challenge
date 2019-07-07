@@ -74,7 +74,7 @@ public class FileBasedSearch<T, ID> implements Searchable<T, ID> {
     }
 
     @Override
-    public String getId() {
+    public String getIdFieldName() {
         return this.id;
     }
 
