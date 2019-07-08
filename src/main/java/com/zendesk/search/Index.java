@@ -82,10 +82,10 @@ public class Index<T> implements Searchable<T> {
                         }else if (f.getType().equals(List.class)){
                             List list = (List) o;
                             for(Object l:list){
-                                multimap.put(l.toString(),this.entries.size()-1);
+                                multimap.put(l.toString().toLowerCase(),this.entries.size()-1);
                             }
                         }else{
-                            multimap.put(o.toString(),this.entries.size()-1);
+                            multimap.put(o.toString().toLowerCase(),this.entries.size()-1);
                         }
                     }else{
                         multimap.put(null,this.entries.size()-1);
@@ -116,12 +116,13 @@ public class Index<T> implements Searchable<T> {
 
     @Override
     public T searchById(String id) {
-        return searchByTermValue(this.id,id).get(0);
+        List<T> list = searchByTermValue(this.id,id);
+        return list.size() > 0 ? list.get(0) : null;
     }
 
     @Override
     public List<T> searchByTermValue(String term, String value) {
-       return this.index.containsKey(term) ? this.index.get(term).get(value)
+       return this.index.containsKey(term) ? this.index.get(term).get(value == null ? null :value.toLowerCase())
                .stream()
                .map(i -> this.entries.get(i))
                .collect(Collectors.toList()):null;
@@ -129,7 +130,7 @@ public class Index<T> implements Searchable<T> {
 
     @Override
     public Set<String> getSearchableFields() {
-        return this.index.keySet();
+        return this.index.keySet().stream().collect(Collectors.toSet());
     }
 
 }

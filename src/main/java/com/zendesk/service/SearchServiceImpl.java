@@ -3,6 +3,10 @@ package com.zendesk.service;
 import com.zendesk.dto.OrganizationDTO;
 import com.zendesk.dto.TicketDTO;
 import com.zendesk.dto.UserDTO;
+import com.zendesk.exception.TermNotPresentException;
+import com.zendesk.mapper.OrganizationToOrganizationDTOMapper;
+import com.zendesk.mapper.TicketToTicketDTOMapper;
+import com.zendesk.mapper.UserToUserDTOMapper;
 import com.zendesk.model.Organization;
 import com.zendesk.model.Ticket;
 import com.zendesk.model.User;
@@ -21,43 +25,50 @@ public class SearchServiceImpl implements SearchService{
 
 
     public SearchServiceImpl(){
-        user = new Index<>("/Users/shubham/projects/users.json",User.class);
-        ticket = new Index<>("/Users/shubham/projects/tickets.json",Ticket.class);
-        organization = new Index<>("/Users/shubham/projects/organizations.json",Organization.class);
+        user = new Index<>("/Users/shubham/projects/zendeskcodingchallenge/src/main/resources/users.json",User.class);
+        ticket = new Index<>("/Users/shubham/projects/zendeskcodingchallenge/src/main/resources/tickets.json",Ticket.class);
+        organization = new Index<>("/Users/shubham/projects/zendeskcodingchallenge/src/main/resources/organizations.json",Organization.class);
 
     }
     @Override
-    public List<UserDTO> searchByUser(String term, String val) {
+    public List<UserDTO> searchByUser(String term, String val) throws TermNotPresentException {
+        if(!user.getSearchableFields().contains(term)){
+            throw new TermNotPresentException("Term " + term + " not present in Users");
+        }
         List<User> userList = new ArrayList<>();
         List<UserDTO> userDTOList = new ArrayList<>();
         userList.addAll(user.searchByTermValue(term,val));
         for(User user : userList){
-            UserDTO userDTO = toUserDTO(user);
-            userDTO.setOrganizationDTO(toOrganizationDTO(organization.searchById(userDTO.getOrganization_id().toString())));
+            UserDTO userDTO = UserToUserDTOMapper.INSTANCE.userToUserDTO(user);
+            if(userDTO.getOrganization_id() != null){
+                userDTO.setOrganizationDTO(OrganizationToOrganizationDTOMapper.INSTANCE.organizationToOrganizationDTO(organization.searchById(userDTO.getOrganization_id().toString())));
+            }
             List<TicketDTO> assignedTickets = ticket.searchByTermValue("assignee_id",userDTO.get_id().toString())
-                    .stream().map(t -> toTicketDTO(t)).collect(Collectors.toList());
+                    .stream().map(t -> TicketToTicketDTOMapper.INSTANCE.ticketToTicketDTO(t)).collect(Collectors.toList());
             userDTO.setAssignedTickets(assignedTickets);
             List<TicketDTO> submittedTickets = ticket.searchByTermValue("submitter_id",userDTO.get_id().toString())
-                    .stream().map(t -> toTicketDTO(t)).collect(Collectors.toList());
+                    .stream().map(t -> TicketToTicketDTOMapper.INSTANCE.ticketToTicketDTO(t)).collect(Collectors.toList());
             userDTO.setSubmittedTickets(submittedTickets);
-            userDTO.setOrganizationDTO(toOrganizationDTO(organization.searchById(userDTO.getOrganization_id().toString())));
             userDTOList.add(userDTO);
         }
         return userDTOList;
     }
 
     @Override
-    public List<OrganizationDTO> searchByOrganization(String term, String val) {
+    public List<OrganizationDTO> searchByOrganization(String term, String val) throws TermNotPresentException {
+        if(!organization.getSearchableFields().contains(term)){
+            throw new TermNotPresentException("Term " + term + " not present in Organizations");
+        }
         List<Organization> organizationList = new ArrayList<>();
         List<OrganizationDTO> organizationDTOList = new ArrayList<>();
         organizationList.addAll(organization.searchByTermValue(term,val));
         for(Organization organization : organizationList){
-            OrganizationDTO organizationDTO = toOrganizationDTO(organization);
+            OrganizationDTO organizationDTO = OrganizationToOrganizationDTOMapper.INSTANCE.organizationToOrganizationDTO(organization);
             List<TicketDTO> tickets = ticket.searchByTermValue("organization_id",organizationDTO.get_id().toString())
-                    .stream().map(t -> toTicketDTO(t)).collect(Collectors.toList());
+                    .stream().map(t -> TicketToTicketDTOMapper.INSTANCE.ticketToTicketDTO(t)).collect(Collectors.toList());
             organizationDTO.setTickets(tickets);
             List<UserDTO> users = user.searchByTermValue("organization_id",organizationDTO.get_id().toString())
-                    .stream().map(u -> toUserDTO(u)).collect(Collectors.toList());
+                    .stream().map(u -> UserToUserDTOMapper.INSTANCE.userToUserDTO(u)).collect(Collectors.toList());
             organizationDTO.setUsers(users);
             organizationDTOList.add(organizationDTO);
         }
@@ -65,80 +76,24 @@ public class SearchServiceImpl implements SearchService{
     }
 
     @Override
-    public List<TicketDTO> searchByTicket(String term, String val) {
+    public List<TicketDTO> searchByTicket(String term, String val) throws TermNotPresentException {
+        if(!ticket.getSearchableFields().contains(term)){
+            throw new TermNotPresentException("Term " + term + " not present in Tickets");
+        }
         List<Ticket> ticketList = new ArrayList<>();
         List<TicketDTO> ticketDTOList = new ArrayList<>();
         ticketList.addAll(ticket.searchByTermValue(term,val));
         for(Ticket ticket : ticketList){
-            TicketDTO ticketDTO = toTicketDTO(ticket);
-            ticketDTO.setOrganization(toOrganizationDTO(organization.searchById(ticketDTO.getOrganization_id().toString())));
-            ticketDTO.setSubmitter(toUserDTO(user.searchById(ticketDTO.getSubmitter_id().toString())));
-            ticketDTO.setAssignee(toUserDTO(user.searchById(ticketDTO.getAssignee_id().toString())));
+            TicketDTO ticketDTO = TicketToTicketDTOMapper.INSTANCE.ticketToTicketDTO(ticket);
+            if(ticketDTO.getOrganization_id() != null){
+                ticketDTO.setOrganization(OrganizationToOrganizationDTOMapper.INSTANCE.organizationToOrganizationDTO(organization.searchById(ticketDTO.getOrganization_id().toString())));
+            }
+            ticketDTO.setSubmitter(UserToUserDTOMapper.INSTANCE.userToUserDTO(user.searchById(ticketDTO.getSubmitter_id().toString())));
+            ticketDTO.setAssignee(UserToUserDTOMapper.INSTANCE.userToUserDTO(user.searchById(ticketDTO.getAssignee_id().toString())));
             ticketDTOList.add(ticketDTO);
         }
         return ticketDTOList;
     }
 
-    private UserDTO toUserDTO(User user){
-        if(user == null) return null;
-        UserDTO userDTO = new UserDTO();
-        userDTO.set_id(user.get_id());
-        userDTO.setActive(user.getActive());
-        userDTO.setAlias(user.getAlias());
-        userDTO.setCreated_at(user.getCreated_at());
-        userDTO.setEmail(user.getEmail());
-        userDTO.setExternal_id(user.getExternal_id());
-        userDTO.setLast_login_at(user.getLast_login_at());
-        userDTO.setLocale(user.getLocale());
-        userDTO.setName(user.getName());
-        userDTO.setOrganization_id(user.getOrganization_id());
-        userDTO.setPhone(user.getPhone());
-        userDTO.setRole(user.getRole());
-        userDTO.setShared(user.getShared());
-        userDTO.setSignature(user.getSignature());
-        userDTO.setSuspended(user.getSuspended());
-        userDTO.setTags(user.getTags());
-        userDTO.setTimezone(user.getTimezone());
-        userDTO.setUrl(user.getUrl());
-        userDTO.setVerified(user.getVerified());
-        return userDTO;
-    }
-
-    private TicketDTO toTicketDTO(Ticket ticket){
-        if(ticket == null) return null;
-        TicketDTO ticketDTO = new TicketDTO();
-        ticketDTO.set_id(ticket.get_id());
-        ticketDTO.setAssignee_id(ticket.getAssignee_id());
-        ticketDTO.setCreated_at(ticket.getCreated_at());
-        ticketDTO.setDescription(ticket.getDescription());
-        ticketDTO.setDue_at(ticket.getDue_at());
-        ticketDTO.setExternal_id(ticket.getExternal_id());
-        ticketDTO.setHas_incidents(ticket.getHas_incidents());
-        ticketDTO.setOrganization_id(ticket.getOrganization_id());
-        ticketDTO.setPriority(ticket.getPriority());
-        ticketDTO.setStatus(ticket.getStatus());
-        ticketDTO.setSubject(ticket.getSubject());
-        ticketDTO.setSubmitter_id(ticket.getSubmitter_id());
-        ticketDTO.setTags(ticket.getTags());
-        ticketDTO.setType(ticket.getType());
-        ticketDTO.setUrl(ticket.getUrl());
-        ticketDTO.setVia(ticket.getVia());
-        return ticketDTO;
-    }
-
-    private OrganizationDTO toOrganizationDTO(Organization organization){
-        if(organization == null) return null;
-        OrganizationDTO organizationDTO = new OrganizationDTO();
-        organizationDTO.set_id(organization.get_id());
-        organizationDTO.setCreated_at(organization.getCreated_at());
-        organizationDTO.setDetails(organization.getDetails());
-        organizationDTO.setDomain_names(organization.getDomain_names());
-        organizationDTO.setExternal_id(organization.getExternal_id());
-        organizationDTO.setName(organization.getName());
-        organizationDTO.setShared_tickets(organization.getShared_tickets());
-        organizationDTO.setTags(organization.getTags());
-        organizationDTO.setUrl(organization.getUrl());
-        return organizationDTO;
-    }
 
 }

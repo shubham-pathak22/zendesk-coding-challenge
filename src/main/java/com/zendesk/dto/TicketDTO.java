@@ -35,5 +35,4 @@ public class TicketDTO {
     private UserDTO submitter;
     private UserDTO assignee;
 
-
 }

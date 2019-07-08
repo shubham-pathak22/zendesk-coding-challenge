@@ -65,11 +65,11 @@ public class UserDTO {
           }
         int i = 0;
          for(TicketDTO t : assignedTickets){
-             s.append("assigned_ticket_"+ ++i).append("\t").append(t.getDescription()).append("\n");
+             s.append("assigned_ticket_"+ ++i).append("\t").append(t.getDescription() + "").append("\n");
          }
          i=0;
         for(TicketDTO t : submittedTickets){
-            s.append("submitted_ticket_"+ ++i).append("\t").append(t.getDescription()).append("\n");
+            s.append("submitted_ticket_"+ ++i).append("\t").append(t.getDescription() + "").append("\n");
         }
         return s.toString();
     }
