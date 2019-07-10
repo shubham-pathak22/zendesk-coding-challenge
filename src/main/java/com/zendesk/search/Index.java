@@ -22,29 +22,25 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public class Index<T> implements Searchable<T> {
-
+public class Index<T, ID> implements Searchable<T, ID> {
 
     private Class<T> clazz;
     private File file;
-    private String id;
+    private String idFieldName;
 
     private List<T> entries;
-    private Map<String,Multimap<String,Integer>> index;
-    private Map<String,Method> getter;
+    private Map<String, Multimap<String, Integer>> index;
+    private Map<String, Method> getter;
     private static final SimpleDateFormat YYYYMMDD = new SimpleDateFormat("yyyy-MM-dd");
 
 
-    public Index(String filePath,Class<T> clazz){
-        this.file = new File(filePath);
+    public Index(File file, Class<T> clazz) {
+        this.file = file;
         this.clazz = clazz;
-        this.index = Maps.newHashMap();
+        this.index = Maps.newLinkedHashMap();
         this.getter = Maps.newHashMap();
         this.entries = Lists.newArrayList();
         buildIndex();
@@ -55,9 +51,9 @@ public class Index<T> implements Searchable<T> {
             Field[] fields = this.clazz.getDeclaredFields();
             for (Field f : fields) {
                 Annotation[] annotations = f.getAnnotations();
-                for(Annotation a :annotations){
-                    if(a.annotationType().equals(Id.class)){
-                        this.id = f.getName();
+                for (Annotation a : annotations) {
+                    if (a.annotationType().equals(Id.class)) {
+                        this.idFieldName = f.getName();
                     }
                 }
                 this.getter.put(f.getName(), new PropertyDescriptor(f.getName(), this.clazz).getReadMethod());
@@ -65,41 +61,41 @@ public class Index<T> implements Searchable<T> {
 
             Gson gson = new GsonBuilder().registerTypeAdapter(Date.class, new DateDeserializer()).create();
             String lines = FileUtils.readFileToString(this.file, "UTF-8");
-            List<T>  jsonList = gson.fromJson(lines, TypeToken.getParameterized(List.class, clazz).getType());
+            List<T> jsonList = gson.fromJson(lines, TypeToken.getParameterized(List.class, clazz).getType());
             for (T jsonObject : jsonList) {
                 this.entries.add(jsonObject);
-                for (Field f : fields){
-                    Multimap<String,Integer> multimap = this.index.get(f.getName());
-                    if(multimap == null){
+                for (Field f : fields) {
+                    Multimap<String, Integer> multimap = this.index.get(f.getName());
+                    if (multimap == null) {
                         multimap = MultimapBuilder.hashKeys().arrayListValues().build();
-                        this.index.put(f.getName(),multimap);
+                        this.index.put(f.getName(), multimap);
                     }
                     Object o = this.getter.get(f.getName()).invoke(jsonObject);
-                    if(o != null){
-                        if(f.getType().equals(Date.class)){
+                    if (o != null) {
+                        if (f.getType().equals(Date.class)) {
                             Date date = (Date) o;
-                            multimap.put(YYYYMMDD.format(date),this.entries.size()-1);
-                        }else if (f.getType().equals(List.class)){
+                            multimap.put(YYYYMMDD.format(date), this.entries.size() - 1);
+                        } else if (f.getType().equals(List.class)) {
                             List list = (List) o;
-                            for(Object l:list){
-                                multimap.put(l.toString().toLowerCase(),this.entries.size()-1);
+                            for (Object l : list) {
+                                multimap.put(l.toString().toLowerCase(), this.entries.size() - 1);
                             }
-                        }else{
-                            multimap.put(o.toString().toLowerCase(),this.entries.size()-1);
+                        } else {
+                            multimap.put(o.toString().toLowerCase(), this.entries.size() - 1);
                         }
-                    }else{
-                        multimap.put(null,this.entries.size()-1);
+                    } else {
+                        multimap.put(null, this.entries.size() - 1);
                     }
                 }
             }
         } catch (IntrospectionException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
         } catch (InvocationTargetException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
         }
 
     }
@@ -115,22 +111,24 @@ public class Index<T> implements Searchable<T> {
     }
 
     @Override
-    public T searchById(String id) {
-        List<T> list = searchByTermValue(this.id,id);
+    public T searchById(ID id) {
+        if (id == null) throw new IllegalArgumentException("Id cannot be null");
+        List<T> list = searchByTermValue(this.idFieldName, id.toString());
         return list.size() > 0 ? list.get(0) : null;
     }
 
     @Override
     public List<T> searchByTermValue(String term, String value) {
-       return this.index.containsKey(term) ? this.index.get(term).get(value == null ? null :value.toLowerCase())
-               .stream()
-               .map(i -> this.entries.get(i))
-               .collect(Collectors.toList()):null;
+        if (term == null) throw new IllegalArgumentException("Term cannot be null");
+        return this.index.containsKey(term) ? this.index.get(term).get(value == null ? null : value.toLowerCase())
+                .stream()
+                .map(i -> this.entries.get(i))
+                .collect(Collectors.toList()) : null;
     }
 
     @Override
     public Set<String> getSearchableFields() {
-        return this.index.keySet().stream().collect(Collectors.toSet());
+        return this.index.keySet().stream().collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
 }

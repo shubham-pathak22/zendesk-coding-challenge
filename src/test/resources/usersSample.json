@@ -56,7 +56,7 @@
     "url": "http://initech.zendesk.com/api/v2/users/3.json",
     "external_id": "85c599c1-ebab-474d-a4e6-32f1c06e8730",
     "name": "Ingrid Wagner",
-    "alias": "Miss Buck",
+    "alias": "",
     "created_at": "2016-07-28T05:29:25 -10:00",
     "active": false,
     "verified": false,

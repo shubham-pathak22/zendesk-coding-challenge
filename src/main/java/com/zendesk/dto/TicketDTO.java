@@ -3,6 +3,7 @@ package com.zendesk.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
 
@@ -34,5 +35,27 @@ public class TicketDTO {
     //user
     private UserDTO submitter;
     private UserDTO assignee;
+
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        Field[] fields = this.getClass().getDeclaredFields();
+        for (Field f : fields) {
+            try {
+                if (f.getName().equals("submitter")) {
+                    s.append(String.format("%-20s%s%n", "submitter",submitter == null ? null : submitter.getName()));
+                } else if (f.getName().equals("assignee")) {
+                    s.append(String.format("%-20s%s%n", "assignee",assignee == null ? null : assignee.getName()));
+                } else if (f.getName().equals("organization")) {
+                    s.append(String.format("%-20s%s%n", "organization",organization.getName()));
+                } else {
+                    s.append(String.format("%-20s%s%n", f.getName(), f.get(this)));
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return s.toString();
+    }
 
 }
