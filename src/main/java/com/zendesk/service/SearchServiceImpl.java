@@ -84,9 +84,8 @@ public class SearchServiceImpl implements SearchService{
 
     @Override
     public Set<TicketDTO> searchByTicket(String term, String val) throws TermNotPresentException {
-        System.out.println(val);
         if(!ticket.getSearchableFields().contains(term)){
-            throw new TermNotPresentException("Term " + term + " is  not present in Tickets");
+            throw new TermNotPresentException("Term " + term + " is not present in Tickets");
         }
         Set<Ticket> ticketSet = new LinkedHashSet<>();
         Set<TicketDTO> ticketDTOSet = new LinkedHashSet<>();

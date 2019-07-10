@@ -6,6 +6,7 @@ import lombok.Setter;
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Setter
 @Getter
@@ -46,15 +47,17 @@ public class UserDTO {
         for (Field f : fields) {
             try {
                 if (f.getName().equals("assignedTickets")) {
-                    int i = 0;
-                    for (TicketDTO t : assignedTickets) {
-                        s.append(String.format("%-20s%s%n", "assignedTicket_" + ++i, t.getSubject()));
-                    }
+                    AtomicInteger atomicInteger = new AtomicInteger(0);
+                    assignedTickets.stream().forEach( t -> {
+                        s.append(String.format("%-20s%s%n", "assignedTicket_" + atomicInteger.get(), t.getSubject()));
+                        atomicInteger.getAndIncrement();
+                    });
                 } else if (f.getName().equals("submittedTickets")) {
-                    int i = 0;
-                    for (TicketDTO t : submittedTickets) {
-                        s.append(String.format("%-20s%s%n", "submittedTicket_" + ++i, t.getSubject()));
-                    }
+                    AtomicInteger atomicInteger = new AtomicInteger(0);
+                    submittedTickets.stream().forEach( t -> {
+                        s.append(String.format("%-20s%s%n", "submittedTicket_" + atomicInteger.get(), t.getSubject()));
+                        atomicInteger.getAndIncrement();
+                    });
                 }else if (f.getName().equals("organization")) {
                     s.append(String.format("%-20s%s%n", "organization",organization == null ? null : organization.getName()));
                 } else {

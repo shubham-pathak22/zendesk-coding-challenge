@@ -2,6 +2,9 @@ package com.zendesk.application;
 
 import java.util.Set;
 
+/**
+ * Methods to display contents for the menu driven program
+ */
 public class Console {
 
     public static final String SEARCH = "1";

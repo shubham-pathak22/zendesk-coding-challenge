@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -110,6 +111,25 @@ public class IndexTest {
         for (int i = 0; i < list1.size(); i++) {
             Assert.assertEquals(list1.get(i).get_id(), list2.get(i).get_id());
         }
+    }
+
+    @Test
+    public void testSearchTermValue_valueAsDateInYYYYMMDDFormat_shouldReturnAllMatchingYYYYMMDD() {
+        File file = new File(this.getClass().getResource("/usersSample.json").getFile());
+        Index<User, Integer> index = new Index<>(file, User.class);
+        List<User> list = index.searchByTermValue("created_at", "2016-04-15");
+        Assert.assertEquals(1, list.size());
+        Assert.assertEquals("2016-04-15",new SimpleDateFormat("YYYY-MM-dd").format(list.get(0).getCreated_at()));
+
+    }
+
+    @Test
+    public void testSearchTermValue_valueInArray_shouldReturnAllMatchingValueInArray() {
+        File file = new File(this.getClass().getResource("/usersSample.json").getFile());
+        Index<User, Integer> index = new Index<>(file, User.class);
+        List<User> list = index.searchByTermValue("tags", "Sutton");
+        Assert.assertEquals(2, list.size());
+        list.stream().forEach(l->l.getTags().contains("Sutton"));
     }
 
 

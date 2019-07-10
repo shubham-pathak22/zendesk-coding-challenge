@@ -6,6 +6,7 @@ import lombok.Setter;
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
 @Setter
@@ -31,15 +32,17 @@ public class OrganizationDTO {
         for (Field f : fields) {
             try {
                 if (f.getName().equals("tickets")) {
-                    int i = 0;
-                    for (TicketDTO t : tickets) {
-                        s.append(String.format("%-20s%s%n", "ticket_" + ++i, t.getSubject()));
-                    }
+                    AtomicInteger atomicInteger = new AtomicInteger(0);
+                    tickets.stream().forEach( t -> {
+                        s.append(String.format("%-20s%s%n", "ticket_" + atomicInteger.get(), t.getSubject()));
+                        atomicInteger.getAndIncrement();
+                    });
                 } else if (f.getName().equals("users")) {
-                    int i = 0;
-                    for (UserDTO u : users) {
-                        s.append(String.format("%-20s%s%n", "user_" + ++i, u.getName()));
-                    }
+                    AtomicInteger atomicInteger = new AtomicInteger(0);
+                    users.stream().forEach( u -> {
+                        s.append(String.format("%-20s%s%n", "user_" + atomicInteger.get(), u.getName()));
+                        atomicInteger.getAndIncrement();
+                    });
                 } else {
                     s.append(String.format("%-20s%s%n", f.getName(), f.get(this)));
                 }
@@ -49,4 +52,5 @@ public class OrganizationDTO {
         }
         return s.toString();
     }
+
 }
