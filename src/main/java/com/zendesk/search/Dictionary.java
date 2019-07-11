@@ -25,7 +25,18 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class InvertedIndex<T, ID> implements Searchable<T, ID> {
+/**
+ *
+ * Creates an in-memory inverted index from given json file and implements the {@link Searchable} interface
+ * JSON file must be a valid file containing records in form of JSON array.
+ * All the dates in the JSON  must be of the format yyyy-MM-dd'T'HH:mm:ss ZZ
+ * @param <T> Type of the model object to be searched.
+ *          The model must use {@link Id} to specify id and have getters and setters
+ *           Names of the member variables must match attributes/keys of JSON records
+ *           All member variables must have a getter and setter method
+ * @param <ID> Data type of the ID of the model
+ */
+public class Dictionary<T, ID> implements Searchable<T, ID> {
 
     private Class<T> clazz;
     private File file;
@@ -36,8 +47,12 @@ public class InvertedIndex<T, ID> implements Searchable<T, ID> {
     private Map<String, Method> getter;
     private static final SimpleDateFormat YYYYMMDD = new SimpleDateFormat("yyyy-MM-dd");
 
-
-    public InvertedIndex(File file, Class<T> clazz) {
+    /**
+     * Creates an Dictionary object
+     * @param file File containing json data. Json records should be in form of a json array
+     * @param clazz {@link Class} of the model object
+     */
+    public Dictionary(File file, Class<T> clazz) {
         this.file = file;
         this.clazz = clazz;
         this.index = Maps.newLinkedHashMap();
@@ -110,6 +125,12 @@ public class InvertedIndex<T, ID> implements Searchable<T, ID> {
 
     }
 
+    /**
+     *
+     * @throws IllegalArgumentException if the id is null
+     * @param id id of the object
+     * @return
+     */
     @Override
     public T searchById(ID id) {
         if (id == null) throw new IllegalArgumentException("Id cannot be null");
@@ -117,6 +138,14 @@ public class InvertedIndex<T, ID> implements Searchable<T, ID> {
         return list.size() > 0 ? list.get(0) : null;
     }
 
+    /**
+     * Returns the list of objects that has the given value for the term.
+     * Date values to be searched in the format of  "YYYY-MM-dd"
+     * @throws IllegalArgumentException if the term is null
+     * @param term attribute/key field
+     * @param value value to be searched. Value is case-insensitive
+     * @return List of matched objects. Null if no matching objects found
+     */
     @Override
     public List<T> searchByTermValue(String term, String value) {
         if (term == null) throw new IllegalArgumentException("Term cannot be null");
