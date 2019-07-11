@@ -44,7 +44,7 @@ All JSON Objects are loaded into a data structure called `Dictionary`.
 
 
 
-## Matching Instructions 
+## Features
 * Search is case-insensitve
 * Values in the array can be searched independently. All records containing the particular array value will be matched
 * Keys for the date values are stored  in "YYYY-MM-dd" format. To search for records that were created on 21st April 2015, enter 2015-04-21 as the value
@@ -56,8 +56,9 @@ All JSON Objects are loaded into a data structure called `Dictionary`.
 * Attribute `_id` is unique and document has just one record per `_id`
 * `_id` cannot be null
 * Input files are valid `JSON` files.
-* Json Records in the input file are in form of an `array` 
-* All the date values are of the format `yyyy-MM-dd'T'HH:mm:ss ZZ`
+* Json records in the input file are in the form of an `array` 
+* Date values are of the format `yyyy-MM-dd'T'HH:mm:ss ZZ`
+
 
 ## External Libraries
 * [Google Guava](https://github.com/google/guava)
