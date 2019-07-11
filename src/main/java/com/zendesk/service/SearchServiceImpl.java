@@ -25,7 +25,12 @@ public class SearchServiceImpl implements SearchService{
     private Searchable<Ticket,String> ticket;
     private Searchable<Organization,Integer> organization;
 
-
+    /**
+     *
+     * @param user {@link File} containing user data in json format
+     * @param ticket {@link File} containing ticket data in json format
+     * @param organization {@link File} containing organization data in json format
+     */
     public SearchServiceImpl(File user, File ticket, File organization){
         this.user = new Dictionary<>(user,User.class);
         this.ticket = new Dictionary<>(ticket,Ticket.class);
