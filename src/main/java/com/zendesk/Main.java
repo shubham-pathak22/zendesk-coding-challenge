@@ -19,82 +19,71 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
-        String user = FileUtil.getProperty("config.properties","user.json.path");
-        String tickets = FileUtil.getProperty("config.properties","ticket.json.path");
-        String org = FileUtil.getProperty("config.properties","organization.json.path");
+        String user = FileUtil.getProperty("config.properties", "user.json.path");
+        String tickets = FileUtil.getProperty("config.properties", "ticket.json.path");
+        String org = FileUtil.getProperty("config.properties", "organization.json.path");
 
         File userFile = StringUtils.isBlank(user) ? getFromResource("users.json") : new File(user);
-        File ticketFile =  StringUtils.isBlank(tickets) ? getFromResource("tickets.json") : new File(tickets);
-        File orgFile =  StringUtils.isBlank(org) ? getFromResource("organizations.json") : new File(org);
+        File ticketFile = StringUtils.isBlank(tickets) ? getFromResource("tickets.json") : new File(tickets);
+        File orgFile = StringUtils.isBlank(org) ? getFromResource("organizations.json") : new File(org);
 
-        SearchService zendeskSearch = new SearchServiceImpl(userFile,ticketFile,orgFile);
+        SearchService zendeskSearch = new SearchServiceImpl(userFile, ticketFile, orgFile);
         Console.displayWelcomeScreen();
         String choice;
-        Scanner scan = new Scanner(System.in).useDelimiter("\n");;
+        Scanner scan = new Scanner(System.in).useDelimiter("\n");
+        ;
         do {
             Console.displayMainOptions();
             choice = scan.next();
-            switch (choice){
+            switch (choice) {
                 case Console.SEARCH:
-                    do{
+                    do {
                         Console.displaySearchOptions();
                         choice = scan.next();
-                        switch (choice){
+                        switch (choice) {
                             case Console.SEARCH_USERS:
-                                 System.out.println("Enter search term");
-                                 String term = scan.next();
-                                 System.out.println("Enter search value");
-                                 String value = scan.next();
+                            case Console.SEARCH_TICKETS:
+                            case Console.SEARCH_ORGANIZATIONS:
+                                System.out.println("Enter search term");
+                                String term = scan.next();
+                                System.out.println("Enter search value");
+                                String value = scan.next();
                                 try {
-                                    Console.displayResults(zendeskSearch.searchByUser(term,value));
+                                    if (choice.equals(Console.SEARCH_USERS)) {
+                                        Console.displayResults(zendeskSearch.searchByUser(term, value));
+                                    } else if (choice.equals(Console.SEARCH_TICKETS)) {
+                                        Console.displayResults(zendeskSearch.searchByTicket(term, value));
+                                    } else if (choice.equals(Console.SEARCH_ORGANIZATIONS)) {
+                                        Console.displayResults(zendeskSearch.searchByOrganization(term, value));
+                                    }
                                 } catch (TermNotPresentException e) {
                                     System.out.println(e.getMessage());
                                 }
-                                break;
-                            case Console.SEARCH_TICKETS:
-                                 System.out.println("Enter search term");
-                                  term = scan.next();
-                                 System.out.println("Enter search value");
-                                  value = scan.next();
-                                 try {
-                                    Console.displayResults(zendeskSearch.searchByTicket(term,value));
-                                 } catch (TermNotPresentException e) {
-                                    System.out.println(e.getMessage());
-                                 }
-                                break;
-                            case Console.SEARCH_ORGANIZATIONS:
-                                 System.out.println("Enter search term");
-                                  term = scan.next();
-                                 System.out.println("Enter search value");
-                                  value = scan.next();
-                                 try {
-                                     Console.displayResults(zendeskSearch.searchByOrganization(term,value));
-                                 } catch (TermNotPresentException e) {
-                                    System.out.println(e.getMessage());
-                                 }
                                 break;
                             case Console.EXIT:
                                 break;
                             case Console.QUIT:
                                 Console.displayClosingMessage();
                                 System.exit(1);
-                            default:System.out.println("Please enter a valid option.\n");
+                            default:
+                                System.out.println("Please enter a valid option.\n");
                                 break;
                         }
-                    }while(!choice.equals(Console.EXIT));
+                    } while (!choice.equals(Console.EXIT));
                     break;
                 case Console.LIST_FIELDS:
-                    Console.displaySearchableFields("Users" , zendeskSearch.getUserFields());
-                    Console.displaySearchableFields("Tickets" ,zendeskSearch.getTicketFields());
-                    Console.displaySearchableFields("Organizations" ,zendeskSearch.getOrganizationFields());
+                    Console.displaySearchableFields("Users", zendeskSearch.getUserFields());
+                    Console.displaySearchableFields("Tickets", zendeskSearch.getTicketFields());
+                    Console.displaySearchableFields("Organizations", zendeskSearch.getOrganizationFields());
                     break;
                 case Console.QUIT:
                     Console.displayClosingMessage();
                     System.exit(1);
-                default:System.out.println("Please enter a valid option.\n");
+                default:
+                    System.out.println("Please enter a valid option.\n");
                     break;
             }
-        }while(!choice.equals(Console.QUIT));
+        } while (!choice.equals(Console.QUIT));
 
     }
 
