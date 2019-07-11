@@ -58,10 +58,10 @@ public class Dictionary<T, ID> implements Searchable<T, ID> {
         this.index = Maps.newLinkedHashMap();
         this.getter = Maps.newHashMap();
         this.entries = Lists.newArrayList();
-        buildIndex();
+        buildDictionary();
     }
 
-    private void buildIndex() {
+    private void buildDictionary() {
         try {
             Field[] fields = this.clazz.getDeclaredFields();
             for (Field f : fields) {
