@@ -35,7 +35,7 @@ All JSON Objects are loaded into a data structure called `InvertedIndex`.
 * A `Map<String<Multimap<String,Integer>` which contains mapping of terms to a multimap containing values and list of indices of the actual objects containing those values
 
 
-![alt text](https://github.com/shubham-pathak22/zendesk-coding-challenge/blob/master/figure.png"")
+![alt text](https://github.com/shubham-pathak22/zendesk-coding-challenge/blob/master/figure.png "InvertedIndex")
 
 ## Matching Instructions 
 * Elements belonging to the array can be searched individually.
