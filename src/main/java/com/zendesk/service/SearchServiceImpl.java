@@ -10,7 +10,7 @@ import com.zendesk.mapper.UserToUserDTOMapper;
 import com.zendesk.model.Organization;
 import com.zendesk.model.Ticket;
 import com.zendesk.model.User;
-import com.zendesk.search.Index;
+import com.zendesk.search.InvertedIndex;
 import com.zendesk.search.Searchable;
 
 import java.io.File;
@@ -27,9 +27,9 @@ public class SearchServiceImpl implements SearchService{
 
 
     public SearchServiceImpl(File user, File ticket, File organization){
-        this.user = new Index<>(user,User.class);
-        this.ticket = new Index<>(ticket,Ticket.class);
-        this.organization = new Index<>(organization,Organization.class);
+        this.user = new InvertedIndex<>(user,User.class);
+        this.ticket = new InvertedIndex<>(ticket,Ticket.class);
+        this.organization = new InvertedIndex<>(organization,Organization.class);
 
     }
     @Override

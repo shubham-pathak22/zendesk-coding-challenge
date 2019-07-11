@@ -25,7 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Index<T, ID> implements Searchable<T, ID> {
+public class InvertedIndex<T, ID> implements Searchable<T, ID> {
 
     private Class<T> clazz;
     private File file;
@@ -37,7 +37,7 @@ public class Index<T, ID> implements Searchable<T, ID> {
     private static final SimpleDateFormat YYYYMMDD = new SimpleDateFormat("yyyy-MM-dd");
 
 
-    public Index(File file, Class<T> clazz) {
+    public InvertedIndex(File file, Class<T> clazz) {
         this.file = file;
         this.clazz = clazz;
         this.index = Maps.newLinkedHashMap();
