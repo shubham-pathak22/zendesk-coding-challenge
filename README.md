@@ -17,12 +17,12 @@ Alternatively, open the project in an IDE and run `Main.java`
 
 ## Data
 
-By default the application uses the files present in the resources folder as input files.
+By default the application uses the files present in the `resources` folder as input files.
 ```
 $ ls src/main/resources/*.json
 users.json tickets.json organizations.json
 ```
-To use other files as input, please edit the config.properties to provide complete path for the files. 
+To provide other files as input, please edit the `config.properties` to provide complete path for the files. 
 ```
 $ cat src/main/resources/config.properties 
 user.json.path=
@@ -58,6 +58,19 @@ All JSON Objects are loaded into a data structure called `Dictionary`.
 * Input files are valid `JSON` files.
 * Json Records in the input file are in form of an `array` 
 * All the date values are of the format `yyyy-MM-dd'T'HH:mm:ss ZZ`
+
+## External Libraries
+* [Google Guava](https://github.com/google/guava)
+* [Google Gson](https://github.com/google/gson)
+* [Joda-Time](https://www.joda.org/joda-time/)
+* [Apache Commons](https://commons.apache.org/proper/commons-io/)
+* [Apache Commons Lang](https://commons.apache.org/proper/commons-lang/)
+* [Lombok](https://projectlombok.org)
+* [MapStruct](http://mapstruct.org)
+* [Junit4](https://junit.org/junit4/)
+
+
+
 
 
 
