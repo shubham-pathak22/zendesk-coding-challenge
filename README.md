@@ -40,7 +40,7 @@ All JSON Objects are loaded into a data structure called `Dictionary`.
 * An `Inverted Index (Map<String<Multimap<String,Integer>)` which contains mapping of terms to a multimap containing values and list of indices of the actual objects containing those values
 
 
-![alt text](https://github.com/shubham-pathak22/zendesk-coding-challenge/blob/master/figure.png "Dictionary")
+![alt text](https://github.com/shubham-pathak22/zendesk-coding-challenge/blob/master/dictionary.png "Dictionary")
 
 
 
