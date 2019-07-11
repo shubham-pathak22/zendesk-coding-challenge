@@ -5,24 +5,28 @@ import com.zendesk.application.Console;
 import com.zendesk.exception.TermNotPresentException;
 import com.zendesk.service.SearchService;
 import com.zendesk.service.SearchServiceImpl;
-import com.zendesk.utils.FileUtils;
+import com.zendesk.utils.FileUtil;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) throws IOException {
 
-        String user = FileUtils.getProperty("config.properties","user.json.path");
-        String tickets = FileUtils.getProperty("config.properties","ticket.json.path");
-        String org = FileUtils.getProperty("config.properties","organization.json.path");
+        String user = FileUtil.getProperty("config.properties","user.json.path");
+        String tickets = FileUtil.getProperty("config.properties","ticket.json.path");
+        String org = FileUtil.getProperty("config.properties","organization.json.path");
 
-        File userFile = StringUtils.isBlank(user) ? new File(Main.class.getResource("/users.json").getFile()) : new File(user);
-        File ticketFile = StringUtils.isBlank(tickets)? new File(Main.class.getResource("/tickets.json").getFile()) : new File(tickets);
-        File orgFile = StringUtils.isBlank(org) ? new File(Main.class.getResource("/organizations.json").getFile()) : new File(org);
+        File userFile = StringUtils.isBlank(user) ? getFromResource("users.json") : new File(user);
+        File ticketFile =  StringUtils.isBlank(tickets) ? getFromResource("tickets.json") : new File(tickets);
+        File orgFile =  StringUtils.isBlank(org) ? getFromResource("organizations.json") : new File(org);
 
         SearchService zendeskSearch = new SearchServiceImpl(userFile,ticketFile,orgFile);
         Console.displayWelcomeScreen();
@@ -93,5 +97,19 @@ public class Main {
             }
         }while(!choice.equals(Console.QUIT));
 
+    }
+
+    private static File getFromResource(String s) {
+        InputStream inputStream = Main.class.getClassLoader().getResourceAsStream(s);
+        File tmpFile = null;
+        try {
+            tmpFile = File.createTempFile(s, ".tmp");
+            FileUtils.copyInputStreamToFile(inputStream, tmpFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+        return tmpFile;
     }
 }
